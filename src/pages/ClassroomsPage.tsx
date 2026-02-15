@@ -17,12 +17,18 @@ export default function ClassroomsPage() {
   const [gradeId, setGradeId] = useState<number>(1)
   const [subjectId, setSubjectId] = useState<number>(1)
 
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(null)
+
   const load = async () => {
     setErr(null)
     setBusy(true)
     try {
       const data = await classroomsApi.list()
       setItems(data)
+      if (data.length > 0 && selectedGrade === null) {
+        const firstGrade = [...new Set(data.map((c) => c.gradeId))].sort((a, b) => a - b)[0]
+        setSelectedGrade(firstGrade ?? null)
+      }
     } catch (e: any) {
       setErr(e?.response?.data ?? 'Failed to load classrooms. Make sure you are logged in.')
     } finally {
@@ -41,12 +47,30 @@ export default function ClassroomsPage() {
       await classroomsApi.create({ name, gradeId, subjectId, teacherUserId: teacherId })
       setName('')
       await load()
+      setSelectedGrade(gradeId)
     } catch (e: any) {
       setErr(e?.response?.data ?? 'Failed to create classroom')
     }
   }
 
-  const cards = useMemo(() => items, [items])
+  const grades = useMemo(() => {
+    const unique = [...new Set(items.map((c) => c.gradeId))].sort((a, b) => a - b)
+    return unique
+  }, [items])
+
+  const grouped = useMemo(() => {
+    const map = new Map<number, ClassroomDto[]>()
+    for (const c of items) {
+      if (!map.has(c.gradeId)) map.set(c.gradeId, [])
+      map.get(c.gradeId)!.push(c)
+    }
+    return map
+  }, [items])
+
+  const classroomsForGrade = useMemo(() => {
+    if (selectedGrade === null) return []
+    return grouped.get(selectedGrade) ?? []
+  }, [grouped, selectedGrade])
 
   return (
     <ProtectedRoute>
@@ -59,7 +83,7 @@ export default function ClassroomsPage() {
                   <div>
                     <div style={{ fontWeight: 900 }}>Your classrooms</div>
                     <div className="muted" style={{ marginTop: 6 }}>
-                      Create and manage classroom spaces.
+                      Select a grade to view classes and resources.
                     </div>
                   </div>
                   <div className="spacer" />
@@ -73,35 +97,51 @@ export default function ClassroomsPage() {
                   </div>
                 )}
 
-                {!busy && cards.length === 0 && <div className="empty">No classrooms yet. Create one on the right.</div>}
+                {!busy && grades.length === 0 && <div className="empty">No classrooms yet. Create one on the right.</div>}
 
-                <div className="grid" style={{ marginTop: 12 }}>
-                  {cards.map((c) => (
-                    <div key={c.id} className="col-6">
-                      <div className="card">
-                        <div className="card-b">
-                          <div className="row">
-                            <div style={{ fontWeight: 900 }}>{c.name}</div>
-                            <div className="spacer" />
-                            <span className="pill">Grade {c.gradeId}</span>
-                          </div>
-                          <div className="muted" style={{ marginTop: 8 }}>
-                            Classroom ID: {c.id}
-                          </div>
-                          <div className="row" style={{ marginTop: 12 }}>
-                            <Link className="btn" to={`/resources?classroomId=${c.id}`}>
-                              View resources
-                            </Link>
-                            <button className="btn" onClick={() => navigator.clipboard.writeText(String(c.id))}>
-                              Copy ID
-                            </button>
-                            <div className="spacer" />
+                {grades.length > 0 && (
+                  <>
+                    <div className="row" style={{ flexWrap: 'wrap', gap: 10 }}>
+                      {grades.map((g) => (
+                        <button
+                          key={g}
+                          className={`btn ${selectedGrade === g ? 'btn-primary' : ''}`}
+                          onClick={() => setSelectedGrade(g)}
+                        >
+                          Grade {g}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="grid" style={{ marginTop: 16 }}>
+                      {classroomsForGrade.map((c) => (
+                        <div key={c.id} className="col-6">
+                          <div className="card">
+                            <div className="card-b">
+                              <div className="row">
+                                <div style={{ fontWeight: 900 }}>{c.name}</div>
+                                <div className="spacer" />
+                                <span className="pill">Grade {c.gradeId}</span>
+                              </div>
+                              <div className="muted" style={{ marginTop: 8 }}>
+                                Classroom ID: {c.id}
+                              </div>
+                              <div className="row" style={{ marginTop: 12 }}>
+                                <Link className="btn" to={`/resources?classroomId=${c.id}`}>
+                                  View resources
+                                </Link>
+                                <button className="btn" onClick={() => navigator.clipboard.writeText(String(c.id))}>
+                                  Copy ID
+                                </button>
+                                <div className="spacer" />
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
