@@ -126,7 +126,7 @@ export default function ClassroomsPage() {
                               <div className="muted" style={{ marginTop: 8 }}>
                                 Classroom ID: {c.id}
                               </div>
-                              <div className="row" style={{ marginTop: 12 }}>
+                              <div className="row" style={{ marginTop: 12, flexWrap: 'wrap' }}>
                                 <Link className="btn" to={`/resources?classroomId=${c.id}`}>
                                   View resources
                                 </Link>

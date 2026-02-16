@@ -166,28 +166,30 @@ export default function ResourcesPage() {
                     )}
 
                     {filteredRows.length > 0 && (
-                      <table className="table" style={{ marginTop: 10 }}>
-                        <thead>
-                          <tr>
-                            <th>File</th>
-                            <th>Uploaded</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredRows.map((r) => (
-                            <tr key={r.id}>
-                              <td style={{ color: 'var(--text)' }}>{r.fileName}</td>
-                              <td>{new Date(r.uploadedAt).toLocaleString()}</td>
-                              <td style={{ textAlign: 'right' }}>
-                                <button className="btn" onClick={() => download(r.id, r.fileName)}>
-                                  Download
-                                </button>
-                              </td>
+                      <div className="table-wrapper">
+                        <table className="table" style={{ marginTop: 10 }}>
+                          <thead>
+                            <tr>
+                              <th>File</th>
+                              <th>Uploaded</th>
+                              <th></th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {filteredRows.map((r) => (
+                              <tr key={r.id}>
+                                <td style={{ color: 'var(--text)' }}>{r.fileName}</td>
+                                <td>{new Date(r.uploadedAt).toLocaleString()}</td>
+                                <td style={{ textAlign: 'right' }}>
+                                  <button className="btn" onClick={() => download(r.id, r.fileName)}>
+                                    Download
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     )}
                   </>
                 )}
