@@ -178,10 +178,10 @@ export default function ResourcesPage() {
                           <tbody>
                             {filteredRows.map((r) => (
                               <tr key={r.id}>
-                                <td style={{ color: 'var(--text)' }}>{r.fileName}</td>
+                                <td style={{ color: 'var(--text)' }}>{r.originalFileName}</td>
                                 <td>{new Date(r.uploadedAt).toLocaleString()}</td>
                                 <td style={{ textAlign: 'right' }}>
-                                  <button className="btn" onClick={() => download(r.id, r.fileName)}>
+                                  <button className="btn" onClick={() => download(r.id, r.originalFileName)}>
                                     Download
                                   </button>
                                 </td>
@@ -200,18 +200,18 @@ export default function ResourcesPage() {
           <div className="col-4">
             <div className="card">
               <div className="card-h">
-                <div style={{ fontWeight: 900 }}>Upload PDF</div>
+                <div style={{ fontWeight: 900 }}>Upload Resource</div>
                 <div className="muted" style={{ marginTop: 6 }}>
                   For the selected classroom.
                 </div>
               </div>
               <div className="card-b">
                 <div className="field">
-                  <label>File (PDF)</label>
+                  <label>File (PDF, ZIP, DOC, DOCX, PNG, JPG)</label>
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="application/pdf"
+                    accept=".pdf,.zip,.doc,.docx,.png,.jpg,.jpeg,application/pdf,application/zip,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
                     onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                     disabled={!classroomId}
                   />
@@ -242,7 +242,7 @@ export default function ResourcesPage() {
                 </button>
 
                 <div className="empty" style={{ marginTop: 12 }}>
-                  Your backend limits file size to 25MB (MaxPdfBytes) — perfect for worksheets.
+                  File size limit: 30MB. Supported formats: PDF, ZIP, DOC, DOCX, PNG, JPG.
                 </div>
               </div>
             </div>

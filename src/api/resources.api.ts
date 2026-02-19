@@ -3,9 +3,16 @@ import { http } from './http'
 export type ResourceDto = {
   id: number
   classroomId: number
-  fileName: string
+  originalFileName: string
+  title: string
   category: string
   uploadedAt: string
+  sizeBytes: number
+}
+
+// Alias for backward compatibility
+interface ResourceDto {
+  fileName?: string
 }
 
 export type UploadResourceResponse = {

@@ -26,9 +26,6 @@ export default function Sidebar() {
         <div style={{ fontSize: '0.8rem', marginTop: 6 }}>Login to use full features and manage your studies.</div>
       </div>
 
-      <button onClick={logout} className="btn" style={{ width: '100%', marginTop: 'auto' }}>
-        Logout
-      </button>
     </div>
   )
 }
