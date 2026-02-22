@@ -8,6 +8,8 @@ export type ResourceDto = {
   category: string
   uploadedAt: string
   sizeBytes: number
+  classroomName?: string
+  contentType?: string
 }
 
 // Alias for backward compatibility
@@ -23,6 +25,9 @@ export type UploadResourceResponse = {
 export const resourcesApi = {
   listByClassroom: async (classroomId: number) =>
     (await http.get<ResourceDto[]>(`/api/v1/resources/${classroomId}`)).data,
+
+  getAll: async () =>
+    (await http.get<ResourceDto[]>('/api/v1/resources/all')).data,
 
   upload: async (classroomId: number, file: File, teacherId: string | number, category: string = 'Past Papers') => {
     const form = new FormData()

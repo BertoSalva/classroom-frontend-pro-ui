@@ -18,7 +18,7 @@ export default function Sidebar() {
       <nav className="nav">
         <Link to="/dashboard">🏠 Dashboard</Link>
         <Link to="/classrooms">🏫 Classrooms</Link>
-        <Link to="/resources">📚 Resources</Link>
+        <Link to="/past-papers">📚 Past Papers</Link>
       </nav>
 
       <div className="tip">

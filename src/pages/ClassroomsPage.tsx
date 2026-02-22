@@ -6,7 +6,7 @@ import { useAuth } from '../auth/AuthContext'
 import { Link } from 'react-router-dom'
 
 export default function ClassroomsPage() {
-  const { payload } = useAuth()
+  const { payload, roles } = useAuth()
   const teacherId = payload?.sub
 
   const [items, setItems] = useState<ClassroomDto[]>([])
@@ -76,7 +76,7 @@ export default function ClassroomsPage() {
     <ProtectedRoute>
       <Layout>
         <div className="grid">
-          <div className="col-8">
+          <div className={roles.includes('Learner') ? 'col-12' : 'col-8'}>
             <div className="card">
               <div className="card-h">
                 <div className="row">
@@ -146,49 +146,51 @@ export default function ClassroomsPage() {
             </div>
           </div>
 
-          <div className="col-4">
-            <div className="card">
-              <div className="card-h">
-                <div style={{ fontWeight: 900 }}>Create classroom</div>
-                <div className="muted" style={{ marginTop: 6 }}>
-                  Teachers can create classrooms for learners.
+          {!roles.includes('Learner') && (
+            <div className="col-4">
+              <div className="card">
+                <div className="card-h">
+                  <div style={{ fontWeight: 900 }}>Create classroom</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Teachers can create classrooms for learners.
+                  </div>
                 </div>
-              </div>
-              <div className="card-b">
-                <div className="field">
-                  <label>Name</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Maths Term 1" />
-                </div>
-                <div className="field">
-                  <label>Grade</label>
-                  <select value={gradeId} onChange={(e) => setGradeId(Number(e.target.value))}>
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <option key={i + 1} value={i + 1}>
-                        Grade {i + 1}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <label>Subject</label>
-                  <select value={subjectId} onChange={(e) => setSubjectId(Number(e.target.value))}>
-                    <option value={1}>Mathematics</option>
-                    <option value={2}>English</option>
-                    <option value={3}>Science</option>
-                    <option value={4}>History</option>
-                    <option value={5}>Geography</option>
-                  </select>
-                </div>
-                <button className="btn btn-primary" onClick={create} disabled={!name.trim() || !teacherId}>
-                  Create
-                </button>
+                <div className="card-b">
+                  <div className="field">
+                    <label>Name</label>
+                    <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Maths Term 1" />
+                  </div>
+                  <div className="field">
+                    <label>Grade</label>
+                    <select value={gradeId} onChange={(e) => setGradeId(Number(e.target.value))}>
+                      {Array.from({ length: 12 }).map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          Grade {i + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>Subject</label>
+                    <select value={subjectId} onChange={(e) => setSubjectId(Number(e.target.value))}>
+                      <option value={1}>Mathematics</option>
+                      <option value={2}>English</option>
+                      <option value={3}>Science</option>
+                      <option value={4}>History</option>
+                      <option value={5}>Geography</option>
+                    </select>
+                  </div>
+                  <button className="btn btn-primary" onClick={create} disabled={!name.trim() || !teacherId}>
+                    Create
+                  </button>
 
-                <div className="empty" style={{ marginTop: 12 }}>
-                  If your API restricts classroom creation by role, add RoleGuard for Teacher/SuperAdmin.
+                  <div className="empty" style={{ marginTop: 12 }}>
+                    If your API restricts classroom creation by role, add RoleGuard for Teacher/SuperAdmin.
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </Layout>
     </ProtectedRoute>

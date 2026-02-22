@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ClassroomsPage from './pages/ClassroomsPage'
 import ResourcesPage from './pages/ResourcesPage'
+import PastPapersPage from './pages/PastPapersPage'
 import AdminPage from './pages/AdminPage'
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
 
         <Route path="/classrooms" element={<ClassroomsPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/past-papers" element={<PastPapersPage />} />
 
         <Route path="/admin" element={<AdminPage />} />
 

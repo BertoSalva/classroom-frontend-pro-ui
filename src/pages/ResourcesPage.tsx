@@ -20,7 +20,7 @@ const CATEGORIES = ['Past Papers', 'Revision', 'Class work']
 export default function ResourcesPage() {
   const [params] = useSearchParams()
   const urlClassroomId = Number(params.get('classroomId') ?? 0)
-  const { payload } = useAuth()
+  const { payload, roles } = useAuth()
   const teacherId = payload?.sub
 
   const [classrooms, setClassrooms] = useState<ClassroomDto[]>([])
@@ -114,7 +114,7 @@ export default function ResourcesPage() {
     <ProtectedRoute>
       <Layout>
         <div className="grid">
-          <div className="col-8">
+          <div className={roles.includes('Learner') ? 'col-12' : 'col-8'}>
             <div className="card">
               <div className="card-h">
                 <div className="row">
@@ -197,56 +197,58 @@ export default function ResourcesPage() {
             </div>
           </div>
 
-          <div className="col-4">
-            <div className="card">
-              <div className="card-h">
-                <div style={{ fontWeight: 900 }}>Upload Resource</div>
-                <div className="muted" style={{ marginTop: 6 }}>
-                  For the selected classroom.
-                </div>
-              </div>
-              <div className="card-b">
-                <div className="field">
-                  <label>File (PDF, ZIP, DOC, DOCX, PNG, JPG)</label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.zip,.doc,.docx,.png,.jpg,.jpeg,application/pdf,application/zip,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    disabled={!classroomId}
-                  />
-                </div>
-                {file && (
-                  <div className="field">
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text)', fontWeight: 500 }}>
-                      Selected: <strong>{file.name}</strong>
-                    </div>
+          {!roles.includes('Learner') && (
+            <div className="col-4">
+              <div className="card">
+                <div className="card-h">
+                  <div style={{ fontWeight: 900 }}>Upload Resource</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    For the selected classroom.
                   </div>
-                )}
-                <div className="field">
-                  <label>Category</label>
-                  <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} disabled={!classroomId}>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
                 </div>
-                <button
-                  className="btn btn-primary"
-                  onClick={upload}
-                  disabled={!classroomId || !file || busy}
-                >
-                  {busy ? 'Uploading…' : 'Upload'}
-                </button>
+                <div className="card-b">
+                  <div className="field">
+                    <label>File (PDF, ZIP, DOC, DOCX, PNG, JPG)</label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.zip,.doc,.docx,.png,.jpg,.jpeg,application/pdf,application/zip,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      disabled={!classroomId}
+                    />
+                  </div>
+                  {file && (
+                    <div className="field">
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text)', fontWeight: 500 }}>
+                        Selected: <strong>{file.name}</strong>
+                      </div>
+                    </div>
+                  )}
+                  <div className="field">
+                    <label>Category</label>
+                    <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} disabled={!classroomId}>
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={upload}
+                    disabled={!classroomId || !file || busy}
+                  >
+                    {busy ? 'Uploading…' : 'Upload'}
+                  </button>
 
-                <div className="empty" style={{ marginTop: 12 }}>
-                  File size limit: 30MB. Supported formats: PDF, ZIP, DOC, DOCX, PNG, JPG.
+                  <div className="empty" style={{ marginTop: 12 }}>
+                    File size limit: 30MB. Supported formats: PDF, ZIP, DOC, DOCX, PNG, JPG.
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </Layout>
     </ProtectedRoute>
