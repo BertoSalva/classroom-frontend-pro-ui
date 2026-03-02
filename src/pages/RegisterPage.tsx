@@ -19,7 +19,18 @@ export default function RegisterPage() {
       await authApi.register({ email, password, fullName, role })
       nav('/login')
     } catch (e: any) {
-      setErr(e?.response?.data ?? 'Registration failed')
+      const errorData = e?.response?.data
+      if (Array.isArray(errorData)) {
+        // Handle array of error objects
+        const errorMessages = errorData.map((err: any) => err.description || err.message || String(err)).join('. ')
+        setErr(errorMessages)
+      } else if (typeof errorData === 'string') {
+        setErr(errorData)
+      } else if (errorData?.message) {
+        setErr(errorData.message)
+      } else {
+        setErr('Registration failed')
+      }
     } finally {
       setBusy(false)
     }
