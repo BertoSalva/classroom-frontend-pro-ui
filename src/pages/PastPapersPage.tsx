@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useContext } from 'react'
 import Layout from '../components/Layout'
 import ProtectedRoute from '../auth/ProtectedRoute'
 import { resourcesApi, type ResourceDto } from '../api/resources.api'
 import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
+import { SearchContext } from '../components/Layout'
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob)
@@ -29,11 +30,20 @@ const GRADES = [
 ]
 
 export default function PastPapersPage() {
+  const { searchQuery } = useContext(SearchContext)
   const [selectedGrade, setSelectedGrade] = useState<number>(1)
+  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all')
   const [allResources, setAllResources] = useState<ResourceDto[]>([])
   const [classrooms, setClassrooms] = useState<ClassroomDto[]>([])
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+
+  const getPaperYear = (resource: ResourceDto) => {
+    if (resource.resourceYear) {
+      return new Date(resource.resourceYear).getFullYear()
+    }
+    return new Date(resource.uploadedAt).getFullYear()
+  }
 
   const loadData = async () => {
     setErr(null)
@@ -72,15 +82,49 @@ export default function PastPapersPage() {
     const classroomGradeMap = new Map<number, number>()
     classrooms.forEach((c) => classroomGradeMap.set(c.id, c.gradeId))
 
-    const filtered = allResources.filter((r) => {
+    let filtered = allResources.filter((r) => {
       const classroomGrade = classroomGradeMap.get(r.classroomId)
       // Treat empty category as "Past Papers" for backward compatibility
       const category = r.category || 'Past Papers'
-      return category === 'Past Papers' && classroomGrade === selectedGrade
+      const year = getPaperYear(r)
+      const yearMatch = selectedYear === 'all' || year === selectedYear
+      return category === 'Past Papers' && classroomGrade === selectedGrade && yearMatch
     })
 
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter((r) => 
+        r.title.toLowerCase().includes(query) ||
+        r.originalFileName.toLowerCase().includes(query) ||
+        (r.classroomName || '').toLowerCase().includes(query)
+      )
+    }
+
     return filtered
+  }, [allResources, classrooms, selectedGrade, selectedYear, searchQuery])
+
+  const availableYears = useMemo(() => {
+    const classroomGradeMap = new Map<number, number>()
+    classrooms.forEach((c) => classroomGradeMap.set(c.id, c.gradeId))
+
+    const years = new Set<number>()
+    allResources.forEach((r) => {
+      const classroomGrade = classroomGradeMap.get(r.classroomId)
+      const category = r.category || 'Past Papers'
+      if (category === 'Past Papers' && classroomGrade === selectedGrade) {
+        years.add(getPaperYear(r))
+      }
+    })
+
+    return Array.from(years).sort((a, b) => b - a)
   }, [allResources, classrooms, selectedGrade])
+
+  useEffect(() => {
+    if (selectedYear !== 'all' && !availableYears.includes(selectedYear)) {
+      setSelectedYear('all')
+    }
+  }, [availableYears, selectedYear])
 
   return (
     <ProtectedRoute>
@@ -118,6 +162,23 @@ export default function PastPapersPage() {
                   </select>
                 </div>
 
+                <div className="field" style={{ maxWidth: 400 }}>
+                  <label>Filter by Year</label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) =>
+                      setSelectedYear(e.target.value === 'all' ? 'all' : Number(e.target.value))
+                    }
+                  >
+                    <option value="all">All years</option>
+                    {availableYears.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {busy && <div className="empty">Loading...</div>}
 
                 {!busy && filteredPapers.length === 0 && (
@@ -132,6 +193,7 @@ export default function PastPapersPage() {
                           <th>Title</th>
                           <th>Classroom</th>
                           <th>File</th>
+                          <th>Year</th>
                           <th>Uploaded</th>
                           <th></th>
                         </tr>
@@ -142,6 +204,7 @@ export default function PastPapersPage() {
                             <td style={{ color: 'var(--text)', fontWeight: 500 }}>{r.title}</td>
                             <td>{r.classroomName}</td>
                             <td>{r.originalFileName}</td>
+                            <td>{getPaperYear(r)}</td>
                             <td>{new Date(r.uploadedAt).toLocaleDateString()}</td>
                             <td style={{ textAlign: 'right' }}>
                               <button className="btn" onClick={() => download(r.id, r.originalFileName)}>

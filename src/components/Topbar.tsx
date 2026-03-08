@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { useContext } from 'react'
+import { SearchContext } from './Layout'
 
 function pageTitle(pathname: string) {
   if (pathname.startsWith('/admin')) return 'Admin'
@@ -14,6 +16,7 @@ function pageTitle(pathname: string) {
 export default function Topbar() {
   const { pathname } = useLocation()
   const { isAuthed, roles, logout } = useAuth()
+  const { searchQuery, setSearchQuery } = useContext(SearchContext)
 
   return (
     <div className="topbar">
@@ -21,7 +24,11 @@ export default function Topbar() {
       <div className="spacer" />
       <div className="search" role="search">
         <span className="muted">🔎</span>
-        <input placeholder="Search classrooms, resources…" />
+        <input
+          placeholder="Search classrooms, resources…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
       <div className="row">
         {isAuthed ? (

@@ -30,7 +30,14 @@ export default function ResourcesPage() {
   const [err, setErr] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('Past Papers')
+  const [uploadCategory, setUploadCategory] = useState<string>('Past Papers')
+  const [uploadYear, setUploadYear] = useState<number>(new Date().getFullYear())
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear()
+    return Array.from({ length: 30 }, (_, i) => currentYear - i)
+  }, [])
 
   const loadClassrooms = async () => {
     try {
@@ -80,8 +87,15 @@ export default function ResourcesPage() {
     setErr(null)
     setBusy(true)
     try {
-      await resourcesApi.upload(classroomId, file, teacherId, selectedCategory)
+      await resourcesApi.upload(
+        classroomId,
+        file,
+        teacherId,
+        uploadCategory,
+        uploadCategory === 'Past Papers' ? uploadYear : undefined
+      )
       setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       await load()
     } catch (e: any) {
       setErr(e?.response?.data ?? 'Upload failed')
@@ -226,7 +240,7 @@ export default function ResourcesPage() {
                   )}
                   <div className="field">
                     <label>Category</label>
-                    <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} disabled={!classroomId}>
+                    <select value={uploadCategory} onChange={(e) => setUploadCategory(e.target.value)} disabled={!classroomId}>
                       {CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>
                           {cat}
@@ -234,6 +248,22 @@ export default function ResourcesPage() {
                       ))}
                     </select>
                   </div>
+                  {uploadCategory === 'Past Papers' && (
+                    <div className="field">
+                      <label>Upload Year</label>
+                      <select
+                        value={uploadYear}
+                        onChange={(e) => setUploadYear(Number(e.target.value))}
+                        disabled={!classroomId}
+                      >
+                        {yearOptions.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <button
                     className="btn btn-primary"
                     onClick={upload}

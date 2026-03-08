@@ -4,17 +4,14 @@ export type ResourceDto = {
   id: number
   classroomId: number
   originalFileName: string
+  fileName?: string
   title: string
   category: string
   uploadedAt: string
+  resourceYear?: string | null
   sizeBytes: number
   classroomName?: string
   contentType?: string
-}
-
-// Alias for backward compatibility
-interface ResourceDto {
-  fileName?: string
 }
 
 export type UploadResourceResponse = {
@@ -29,12 +26,21 @@ export const resourcesApi = {
   getAll: async () =>
     (await http.get<ResourceDto[]>('/api/v1/resources/all')).data,
 
-  upload: async (classroomId: number, file: File, teacherId: string | number, category: string = 'Past Papers') => {
+  upload: async (
+    classroomId: number,
+    file: File,
+    teacherId: string | number,
+    category: string = 'Past Papers',
+    resourceYear?: number
+  ) => {
     const form = new FormData()
     form.append('file', file)
     form.append('TeacherUserId', String(teacherId))
     form.append('title', file.name)
     form.append('category', category)
+    if (resourceYear) {
+      form.append('ResourceYear', `${resourceYear}-01-01T00:00:00Z`)
+    }
 
     const { data } = await http.post<UploadResourceResponse>(
       `/api/v1/resources/${classroomId}/upload`,

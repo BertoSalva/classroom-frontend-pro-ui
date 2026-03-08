@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useContext } from 'react'
 import Layout from '../components/Layout'
 import ProtectedRoute from '../auth/ProtectedRoute'
 import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
 import { useAuth } from '../auth/AuthContext'
 import { Link } from 'react-router-dom'
+import { SearchContext } from '../components/Layout'
 
 export default function ClassroomsPage() {
   const { payload, roles } = useAuth()
+  const { searchQuery } = useContext(SearchContext)
   const teacherId = payload?.sub
 
   const [items, setItems] = useState<ClassroomDto[]>([])
@@ -69,8 +71,12 @@ export default function ClassroomsPage() {
 
   const classroomsForGrade = useMemo(() => {
     if (selectedGrade === null) return []
-    return grouped.get(selectedGrade) ?? []
-  }, [grouped, selectedGrade])
+    const base = grouped.get(selectedGrade) ?? []
+    // Filter by search query
+    if (!searchQuery.trim()) return base
+    const query = searchQuery.toLowerCase()
+    return base.filter((c) => c.name.toLowerCase().includes(query))
+  }, [grouped, selectedGrade, searchQuery])
 
   return (
     <ProtectedRoute>
