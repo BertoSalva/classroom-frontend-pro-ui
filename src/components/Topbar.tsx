@@ -1,7 +1,5 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { useContext } from 'react'
-import { SearchContext } from './Layout'
 
 function pageTitle(pathname: string) {
   if (pathname.startsWith('/admin')) return 'Admin'
@@ -15,8 +13,19 @@ function pageTitle(pathname: string) {
 
 export default function Topbar() {
   const { pathname } = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { isAuthed, roles, logout } = useAuth()
-  const { searchQuery, setSearchQuery } = useContext(SearchContext)
+  const searchQuery = searchParams.get('q') ?? ''
+
+  const setSearchQuery = (value: string) => {
+    const next = new URLSearchParams(searchParams)
+    if (value.trim()) {
+      next.set('q', value)
+    } else {
+      next.delete('q')
+    }
+    setSearchParams(next)
+  }
 
   return (
     <div className="topbar">

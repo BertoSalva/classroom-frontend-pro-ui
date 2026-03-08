@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState, useContext } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Layout from '../components/Layout'
 import ProtectedRoute from '../auth/ProtectedRoute'
 import { resourcesApi, type ResourceDto } from '../api/resources.api'
 import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
-import { SearchContext } from '../components/Layout'
+import { useSearchParams } from 'react-router-dom'
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob)
@@ -30,7 +30,8 @@ const GRADES = [
 ]
 
 export default function PastPapersPage() {
-  const { searchQuery } = useContext(SearchContext)
+  const [searchParams] = useSearchParams()
+  const searchQuery = searchParams.get('q') ?? ''
   const [selectedGrade, setSelectedGrade] = useState<number>(1)
   const [selectedYear, setSelectedYear] = useState<number | 'all'>('all')
   const [allResources, setAllResources] = useState<ResourceDto[]>([])
@@ -91,13 +92,14 @@ export default function PastPapersPage() {
       return category === 'Past Papers' && classroomGrade === selectedGrade && yearMatch
     })
 
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
+    // Apply search filter - check both trimmed and original
+    const trimmedSearch = searchQuery.trim()
+    if (trimmedSearch && trimmedSearch.length > 0) {
+      const query = trimmedSearch.toLowerCase()
       filtered = filtered.filter((r) => 
-        r.title.toLowerCase().includes(query) ||
-        r.originalFileName.toLowerCase().includes(query) ||
-        (r.classroomName || '').toLowerCase().includes(query)
+        (r.title && r.title.toLowerCase().includes(query)) ||
+        (r.originalFileName && r.originalFileName.toLowerCase().includes(query)) ||
+        (r.classroomName && r.classroomName.toLowerCase().includes(query))
       )
     }
 
