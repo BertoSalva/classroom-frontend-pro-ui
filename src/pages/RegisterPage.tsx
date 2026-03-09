@@ -8,7 +8,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('Learner')
+  const [adminId, setAdminId] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -16,7 +16,7 @@ export default function RegisterPage() {
     setErr(null)
     setBusy(true)
     try {
-      await authApi.register({ email, password, fullName, role })
+      await authApi.register({ email, password, fullName, adminId, role: 'Learner' })
       nav('/login')
     } catch (e: any) {
       const errorData = e?.response?.data
@@ -45,7 +45,7 @@ export default function RegisterPage() {
             <div className="card-h">
               <div style={{ fontWeight: 900, fontSize: 18 }}>Create account</div>
               <div className="muted" style={{ marginTop: 6 }}>
-                Join as a learner or teacher. (You can lock this down later.)
+                Join as a learner. Enter your admission number.
               </div>
             </div>
             <div className="card-b">
@@ -54,20 +54,16 @@ export default function RegisterPage() {
                 <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Albert" />
               </div>
               <div className="field">
+                <label>Admission Number</label>
+                <input value={adminId} onChange={(e) => setAdminId(e.target.value)} placeholder="e.g. 12345" />
+              </div>
+              <div className="field">
                 <label>Email</label>
                 <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" />
               </div>
               <div className="field">
                 <label>Password</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Use a strong password" />
-              </div>
-              <div className="field">
-                <label>Role</label>
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
-                  <option value="Learner">Learner</option>
-                  <option value="Teacher">Teacher</option>
-                  <option value="SuperAdmin">SuperAdmin</option>
-                </select>
               </div>
 
               {err && (

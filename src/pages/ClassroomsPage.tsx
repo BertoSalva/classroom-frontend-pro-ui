@@ -182,7 +182,7 @@ export default function ClassroomsPage() {
                     <select value={subjectId} onChange={(e) => setSubjectId(Number(e.target.value))}>
                       <option value={1}>Mathematics</option>
                       <option value={2}>English</option>
-                      <option value={3}>Science</option>
+                      <option value={3}>Physical Science</option>
                       <option value={4}>History</option>
                       <option value={5}>Geography</option>
                     </select>
@@ -192,7 +192,7 @@ export default function ClassroomsPage() {
                   </button>
 
                   <div className="empty" style={{ marginTop: 12 }}>
-                    If your API restricts classroom creation by role, add RoleGuard for Teacher/SuperAdmin.
+                     
                   </div>
                 </div>
               </div>
