@@ -18,10 +18,15 @@ export default function LoginPage() {
     setBusy(true)
     try {
       const res = await authApi.login({ email, password })
-    setToken(res.accessToken)
+      setToken(res.accessToken)
       nav('/classrooms')
     } catch (e: any) {
-      setErr(e?.response?.data ?? 'Login failed')
+      const msg = e?.response?.data
+      if (typeof msg === 'string' && msg.toLowerCase().includes('verify your email')) {
+        setErr('Your teacher account is not yet verified. Please enter the verification code sent to your email.')
+      } else {
+        setErr(typeof msg === 'string' ? msg : 'Login failed')
+      }
     } finally {
       setBusy(false)
     }
@@ -61,7 +66,10 @@ export default function LoginPage() {
                 </button>
                 <div className="spacer" />
                 <Link className="muted" to="/register">
-                  Create account
+                  Learner registration
+                </Link>
+                <Link className="muted" to="/register-teacher">
+                  Teacher registration
                 </Link>
               </div>
             </div>

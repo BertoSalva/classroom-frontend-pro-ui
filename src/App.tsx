@@ -5,6 +5,7 @@ import { AuthProvider } from './auth/AuthContext'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import TeacherRegisterPage from './pages/TeacherRegisterPage'
 import ClassroomsPage from './pages/ClassroomsPage'
 import ResourcesPage from './pages/ResourcesPage'
 import PastPapersPage from './pages/PastPapersPage'
@@ -19,6 +20,7 @@ export default function App() {
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register-teacher" element={<TeacherRegisterPage />} />
 
         <Route path="/classrooms" element={<ClassroomsPage />} />
         <Route path="/resources" element={<ResourcesPage />} />

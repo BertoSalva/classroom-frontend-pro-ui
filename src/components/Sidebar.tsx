@@ -3,7 +3,8 @@ import { useAuth } from '../auth/AuthContext'
 import logo from '../images/pbhsLogo.webp'
 
 export default function Sidebar() {
-  const { logout } = useAuth()
+  const { roles } = useAuth()
+  const isSuperAdmin = roles.includes('SuperAdmin')
 
   return (
     <div className="sidebar">
@@ -16,8 +17,8 @@ export default function Sidebar() {
       </div>
 
       <nav className="nav">
-        <Link to="/dashboard">🏠 Dashboard</Link>
-        <Link to="/classrooms">🏫 Classrooms</Link>
+        {isSuperAdmin && <Link to="/dashboard">🏠 Dashboard</Link>}
+        {isSuperAdmin && <Link to="/classrooms">🏫 Subject Management</Link>}
         <Link to="/past-papers">📚 Past Papers</Link>
       </nav>
 

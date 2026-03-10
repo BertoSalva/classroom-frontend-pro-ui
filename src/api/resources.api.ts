@@ -9,6 +9,7 @@ export type ResourceDto = {
   category: string
   uploadedAt: string
   resourceYear?: string | null
+  term?: number | null
   sizeBytes: number
   classroomName?: string
   contentType?: string
@@ -31,7 +32,8 @@ export const resourcesApi = {
     file: File,
     teacherId: string | number,
     category: string = 'Past Papers',
-    resourceYear?: number
+    resourceYear?: number,
+    term?: number
   ) => {
     const form = new FormData()
     form.append('file', file)
@@ -40,6 +42,9 @@ export const resourcesApi = {
     form.append('category', category)
     if (resourceYear) {
       form.append('ResourceYear', `${resourceYear}-01-01T00:00:00Z`)
+    }
+    if (term) {
+      form.append('Term', String(term))
     }
 
     const { data } = await http.post<UploadResourceResponse>(

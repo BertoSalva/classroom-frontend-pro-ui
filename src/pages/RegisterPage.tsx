@@ -77,6 +77,9 @@ export default function RegisterPage() {
                   {busy ? 'Creating…' : 'Register'}
                 </button>
                 <div className="spacer" />
+                <Link className="muted" to="/register-teacher">
+                  Teacher registration
+                </Link>
                 <Link className="muted" to="/login">
                   Already have an account?
                 </Link>

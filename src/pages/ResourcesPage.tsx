@@ -32,6 +32,7 @@ export default function ResourcesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('Past Papers')
   const [uploadCategory, setUploadCategory] = useState<string>('Past Papers')
   const [uploadYear, setUploadYear] = useState<number>(new Date().getFullYear())
+  const [uploadTerm, setUploadTerm] = useState<number>(1)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const yearOptions = useMemo(() => {
@@ -92,7 +93,8 @@ export default function ResourcesPage() {
         file,
         teacherId,
         uploadCategory,
-        uploadCategory === 'Past Papers' ? uploadYear : undefined
+        uploadCategory === 'Past Papers' ? uploadYear : undefined,
+        uploadTerm
       )
       setFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -264,6 +266,19 @@ export default function ResourcesPage() {
                       </select>
                     </div>
                   )}
+                  <div className="field">
+                    <label>Term</label>
+                    <select
+                      value={uploadTerm}
+                      onChange={(e) => setUploadTerm(Number(e.target.value))}
+                      disabled={!classroomId}
+                    >
+                      <option value={1}>Term 1</option>
+                      <option value={2}>Term 2</option>
+                      <option value={3}>Term 3</option>
+                      <option value={4}>Term 4</option>
+                    </select>
+                  </div>
                   <button
                     className="btn btn-primary"
                     onClick={upload}
