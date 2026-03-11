@@ -11,7 +11,7 @@ export default function Sidebar() {
       <div className="brand">
         <img src={logo} alt="Parktown Portal Logo" style={{ width: 40, height: 40, borderRadius: 12 }} />
         <div>
-          <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Parktown Portal</div>
+          <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Arise-Hub Portal</div>
           <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>Teacher & Learner hub</div>
         </div>
       </div>
