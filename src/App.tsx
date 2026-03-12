@@ -15,7 +15,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/past-papers" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
 
         <Route path="/login" element={<LoginPage />} />
@@ -28,7 +28,7 @@ export default function App() {
 
         <Route path="/admin" element={<AdminPage />} />
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/past-papers" replace />} />
       </Routes>
     </AuthProvider>
   )

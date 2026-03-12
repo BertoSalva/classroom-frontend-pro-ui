@@ -2,17 +2,18 @@ import { http } from './http'
 
 export type ClassroomDto = {
   id: number
-  name: string
   gradeId: number
+  gradeName: string
   subjectId: number
-  teacherUserId: string
+  subjectName: string
+  categories: string[]
 }
 
 export type CreateClassroomRequest = {
-  name: string
   gradeId: number
   subjectId: number
   teacherUserId: string
+  categories?: string[]
 }
 
 export const classroomsApi = {

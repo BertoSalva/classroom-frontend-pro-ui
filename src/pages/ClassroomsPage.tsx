@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Layout from '../components/Layout'
 import ProtectedRoute from '../auth/ProtectedRoute'
 import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
+import { subjectsApi, type SubjectDto } from '../api/subjects.api'
 import { useAuth } from '../auth/AuthContext'
 import { Link, useSearchParams } from 'react-router-dom'
 
@@ -15,9 +16,10 @@ export default function ClassroomsPage() {
   const [busy, setBusy] = useState(true)
   const [err, setErr] = useState<string | null>(null)
 
-  const [name, setName] = useState('')
-  const [gradeId, setGradeId] = useState<number>(1)
-  const [subjectId, setSubjectId] = useState<number>(1)
+  const [gradeId, setGradeId] = useState<number>(8)
+  const [subjectId, setSubjectId] = useState<number | null>(null)
+  const [subjects, setSubjects] = useState<SubjectDto[]>([])
+  const [subjectErr, setSubjectErr] = useState<string | null>(null)
 
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null)
 
@@ -42,12 +44,30 @@ export default function ClassroomsPage() {
     load()
   }, [])
 
+  useEffect(() => {
+    let isMounted = true
+    const loadSubjects = async () => {
+      try {
+        const data = await subjectsApi.listAll()
+        if (!isMounted) return
+        setSubjects(data)
+        setSubjectErr(null)
+      } catch (error: any) {
+        if (!isMounted) return
+        setSubjectErr('Unable to load subjects. Please try again later.')
+      }
+    }
+    loadSubjects()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const create = async () => {
-    if (!teacherId) return
+    if (!teacherId || subjectId === null) return
     setErr(null)
     try {
-      await classroomsApi.create({ name, gradeId, subjectId, teacherUserId: teacherId })
-      setName('')
+      await classroomsApi.create({ gradeId, subjectId, teacherUserId: teacherId })
       await load()
       setSelectedGrade(gradeId)
     } catch (e: any) {
@@ -60,24 +80,59 @@ export default function ClassroomsPage() {
     return unique
   }, [items])
 
-  const grouped = useMemo(() => {
-    const map = new Map<number, ClassroomDto[]>()
-    for (const c of items) {
-      if (!map.has(c.gradeId)) map.set(c.gradeId, [])
-      map.get(c.gradeId)!.push(c)
-    }
-    return map
-  }, [items])
-
-  const classroomsForGrade = useMemo(() => {
-    if (selectedGrade === null) return []
-    const base = grouped.get(selectedGrade) ?? []
-    // Filter by search query
+  const classroomsBySubject = useMemo(() => {
+    const effectiveGrade = selectedGrade ?? grades[0] ?? null
+    if (effectiveGrade === null) return []
     const trimmedSearch = searchQuery.trim()
-    if (!trimmedSearch || trimmedSearch.length === 0) return base
     const query = trimmedSearch.toLowerCase()
-    return base.filter((c) => c.name && c.name.toLowerCase().includes(query))
-  }, [grouped, selectedGrade, searchQuery])
+    const base = items.filter((c) => c.gradeId === effectiveGrade)
+    const filtered = trimmedSearch
+      ? base.filter((c) => {
+          const subjectLabel = (c.subjectName ?? '').toLowerCase()
+          return subjectLabel.includes(query) || c.id.toString().includes(query)
+        })
+      : base
+
+    const map = new Map<number, { subjectId: number; subjectName: string; classrooms: ClassroomDto[] }>()
+    for (const classroom of filtered) {
+      const subjectLabel = classroom.subjectName?.trim() ?? `Subject ${classroom.subjectId}`
+      const key = classroom.subjectId
+      if (!map.has(key)) {
+        map.set(key, {
+          subjectId: key,
+          subjectName: subjectLabel,
+          classrooms: [],
+        })
+      }
+      map.get(key)!.classrooms.push(classroom)
+    }
+
+    return Array.from(map.values())
+      .map((group) => ({
+        ...group,
+        classrooms: group.classrooms.sort((a, b) => a.id - b.id),
+      }))
+      .sort((a, b) => a.subjectName.localeCompare(b.subjectName))
+  }, [items, selectedGrade, searchQuery, grades])
+
+  const activeGrade = selectedGrade ?? grades[0] ?? gradeId
+
+  const subjectsForGrade = useMemo(() => subjects.filter((subject) => subject.gradeId === gradeId), [gradeId, subjects])
+
+  useEffect(() => {
+    if (subjectsForGrade.length === 0) {
+      if (subjectId !== null) {
+        setSubjectId(null)
+      }
+      return
+    }
+
+    if (subjectId !== null && subjectsForGrade.some((s) => s.id === subjectId)) {
+      return
+    }
+
+    setSubjectId(subjectsForGrade[0].id)
+  }, [subjectId, subjectsForGrade])
 
   return (
     <ProtectedRoute>
@@ -120,32 +175,50 @@ export default function ClassroomsPage() {
                       ))}
                     </div>
 
-                    <div className="grid" style={{ marginTop: 16 }}>
-                      {classroomsForGrade.map((c) => (
-                        <div key={c.id} className="col-6">
-                          <div className="card">
-                            <div className="card-b">
-                              <div className="row">
-                                <div style={{ fontWeight: 900 }}>{c.name}</div>
-                                <div className="spacer" />
-                                <span className="pill">Grade {c.gradeId}</span>
+                    <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {classroomsBySubject.length === 0 ? (
+                        <div className="empty">
+                          No classrooms found for Grade {activeGrade}. Create one on the right.
+                        </div>
+                      ) : (
+                        classroomsBySubject.map((group) => (
+                          <div key={group.subjectId} className="card subject-group-card">
+                            <div className="card-h" style={{ alignItems: 'center', gap: 10 }}>
+                              <div>
+                                <div style={{ fontWeight: 900 }}>{group.subjectName}</div>
+                                <div className="muted" style={{ marginTop: 4 }}>
+                                  {group.classrooms.length} classroom{group.classrooms.length === 1 ? '' : 's'}
+                                </div>
                               </div>
-                              <div className="muted" style={{ marginTop: 8 }}>
-                                Classroom ID: {c.id}
-                              </div>
-                              <div className="row" style={{ marginTop: 12, flexWrap: 'wrap' }}>
-                                <Link className="btn" to={`/resources?classroomId=${c.id}`}>
-                                  View resources
-                                </Link>
-                                <button className="btn" onClick={() => navigator.clipboard.writeText(String(c.id))}>
-                                  Copy ID
-                                </button>
-                                <div className="spacer" />
-                              </div>
+                              <div className="spacer" />
+                              <span className="pill">Grade {activeGrade}</span>
+                            </div>
+                            <div className="card-b" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                              {group.classrooms.map((c) => (
+                                <div key={c.id} className="subject-entry">
+                                  <div className="row" style={{ flexWrap: 'wrap', gap: 10 }}>
+                                    <div>
+                                      <div className="muted">Classroom ID: {c.id}</div>
+                                      {c.categories.length > 0 && (
+                                        <div className="muted" style={{ fontSize: '0.8rem', marginTop: 4 }}>
+                                          {c.categories.join(' • ')}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="spacer" />
+                                    <Link className="btn" to={`/resources?classroomId=${c.id}`}>
+                                      View resources
+                                    </Link>
+                                    <button className="btn" onClick={() => navigator.clipboard.writeText(String(c.id))}>
+                                      Copy ID
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </>
                 )}
@@ -164,36 +237,54 @@ export default function ClassroomsPage() {
                 </div>
                 <div className="card-b">
                   <div className="field">
-                    <label>Name</label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Maths Term 1" />
-                  </div>
-                  <div className="field">
                     <label>Grade</label>
                     <select value={gradeId} onChange={(e) => setGradeId(Number(e.target.value))}>
-                      {Array.from({ length: 12 }).map((_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          Grade {i + 1}
-                        </option>
-                      ))}
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const grade = 8 + i
+                        return (
+                          <option key={grade} value={grade}>
+                            Grade {grade}
+                          </option>
+                        )
+                      })}
                     </select>
                   </div>
                   <div className="field">
                     <label>Subject</label>
-                    <select value={subjectId} onChange={(e) => setSubjectId(Number(e.target.value))}>
-                      <option value={1}>Mathematics</option>
-                      <option value={2}>English</option>
-                      <option value={3}>Physical Science</option>
-                      <option value={4}>History</option>
-                      <option value={5}>Geography</option>
+                    <select
+                      value={subjectId ?? ''}
+                      onChange={(e) => setSubjectId(Number(e.target.value))}
+                      disabled={subjectsForGrade.length === 0}
+                    >
+                      {subjectsForGrade.length === 0 ? (
+                        <option value="">
+                          No subjects for Grade {gradeId}
+                        </option>
+                      ) : (
+                        subjectsForGrade.map((subject) => (
+                          <option key={subject.id} value={subject.id}>
+                            {subject.name}
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
-                  <button className="btn btn-primary" onClick={create} disabled={!name.trim() || !teacherId}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={create}
+                    disabled={!teacherId || subjectId === null}
+                  >
                     Create
                   </button>
-
-                  <div className="empty" style={{ marginTop: 12 }}>
-                     
-                  </div>
+                  {subjectErr ? (
+                    <div className="empty" style={{ marginTop: 12, borderStyle: 'solid', borderColor: 'rgba(240,68,56,0.35)' }}>
+                      {subjectErr}
+                    </div>
+                  ) : subjectsForGrade.length === 0 ? (
+                    <div className="empty" style={{ marginTop: 12, borderStyle: 'solid', borderColor: 'rgba(240,68,56,0.35)' }}>
+                      No subjects are defined for Grade {gradeId}. Ask an admin to add them before creating a classroom.
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>

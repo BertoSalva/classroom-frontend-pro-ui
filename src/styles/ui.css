@@ -242,6 +242,20 @@
   padding: 20px;
 }
 
+.subject-group-card .card-b{
+  padding: 18px 20px;
+}
+
+.subject-entry{
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding-top: 8px;
+}
+
+.subject-entry:first-child{
+  border-top: none;
+  padding-top: 0;
+}
+
 .grid{
   display:grid;
   grid-template-columns: repeat(12, 1fr);
