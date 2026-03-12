@@ -7,6 +7,7 @@ export default function TeacherRegisterPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -18,6 +19,10 @@ export default function TeacherRegisterPage() {
   const register = async () => {
     setErr(null)
     setOk(null)
+    if (!confirmPassword || password !== confirmPassword) {
+      setErr('Passwords do not match')
+      return
+    }
     setBusy(true)
     try {
       const res = await authApi.register({ email, password, fullName, role: 'Teacher' })
@@ -124,15 +129,29 @@ export default function TeacherRegisterPage() {
                 <>
                   <div className="field">
                     <label>Full name</label>
-                    <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Ms Mbuyisa" />
+                    <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Donald Gordan" />
                   </div>
                   <div className="field">
                     <label>Email</label>
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@parktownboys.com" />
+                    <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="" />
                   </div>
                   <div className="field">
                     <label>Password</label>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Use a strong password" />
+                  </div>
+                  <div className="field">
+                    <label>Confirm password</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm your password"
+                    />
+                    {confirmPassword && confirmPassword !== password && (
+                      <div className="muted" style={{ marginTop: 4 }}>
+                        Passwords must match.
+                      </div>
+                    )}
                   </div>
 
                   {err && (

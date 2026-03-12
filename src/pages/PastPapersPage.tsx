@@ -3,6 +3,7 @@ import Layout from '../components/Layout'
 import ProtectedRoute from '../auth/ProtectedRoute'
 import { resourcesApi, type ResourceDto } from '../api/resources.api'
 import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
+import { subjectsApi, type SubjectDto } from '../api/subjects.api'
 import { useSearchParams } from 'react-router-dom'
 
 function downloadBlob(blob: Blob, filename: string) {
@@ -22,14 +23,6 @@ const GRADES = [
   { id: 12, name: 'Grade 12' },
 ]
 
-const SUBJECTS: Record<number, string> = {
-  1: 'Mathematics',
-  2: 'English',
-  3: 'Science',
-  4: 'History',
-  5: 'Geography',
-}
-
 export default function PastPapersPage() {
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') ?? ''
@@ -39,6 +32,7 @@ export default function PastPapersPage() {
   const [selectedTerm, setSelectedTerm] = useState<number | 'all'>('all')
   const [allResources, setAllResources] = useState<ResourceDto[]>([])
   const [classrooms, setClassrooms] = useState<ClassroomDto[]>([])
+  const [subjects, setSubjects] = useState<SubjectDto[]>([])
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -70,6 +64,23 @@ export default function PastPapersPage() {
     loadData()
   }, [])
 
+  useEffect(() => {
+    let isMounted = true
+    const loadSubjects = async () => {
+      try {
+        const data = await subjectsApi.listAll()
+        if (!isMounted) return
+        setSubjects(data)
+      } catch (error: any) {
+        console.error('Failed to load subjects', error)
+      }
+    }
+    loadSubjects()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const download = async (resourceId: number, filename: string) => {
     setErr(null)
     try {
@@ -85,6 +96,17 @@ export default function PastPapersPage() {
     classrooms.forEach((c) => map.set(c.id, c))
     return map
   }, [classrooms])
+
+  const subjectNamesById = useMemo(() => {
+    const map = new Map<number, string>()
+    subjects.forEach((subject) => map.set(subject.id, subject.name))
+    classrooms.forEach((classroom) => {
+      if (!map.has(classroom.subjectId) && classroom.subjectName) {
+        map.set(classroom.subjectId, classroom.subjectName)
+      }
+    })
+    return map
+  }, [subjects, classrooms])
 
   const allPastPapers = useMemo(() => {
     return allResources.filter((r) => (r.category || 'Past Papers') === 'Past Papers')
@@ -110,11 +132,11 @@ export default function PastPapersPage() {
     return Array.from(counts.entries())
       .map(([subjectId, count]) => ({
         subjectId,
-        subjectName: SUBJECTS[subjectId] ?? `Subject ${subjectId}`,
+        subjectName: subjectNamesById.get(subjectId) ?? `Subject ${subjectId}`,
         count,
       }))
       .sort((a, b) => a.subjectName.localeCompare(b.subjectName))
-  }, [allPastPapers, classroomsById, selectedGrade])
+  }, [allPastPapers, classroomsById, selectedGrade, subjectNamesById])
 
   const subjectPapers = useMemo(() => {
     if (selectedGrade === null || selectedSubjectId === null) return []

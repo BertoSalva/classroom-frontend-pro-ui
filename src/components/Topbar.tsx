@@ -27,7 +27,7 @@ export default function Topbar() {
     setSearchParams(next)
   }
 
-  const portalInfo = 'Arise-Hub keeps teachers, learners, and resources in one secure classroom hub.'
+  const portalInfo = 'Arise Hub keeps teachers, learners, and resources in one secure classroom hub.'
   const portalHighlights = ['Exam Planning', 'Test Preparations', 'Resources']
 
   return (
@@ -60,7 +60,7 @@ export default function Topbar() {
               ✦
             </span>
             <div>
-              <div className="topbar-hero-title">Arise-Hub Portal</div>
+              <div className="topbar-hero-title">Arise Hub Portal</div>
               <div className="topbar-hero-subtitle">Secure classroom hub</div>
             </div>
           </div>
