@@ -10,23 +10,52 @@ import ClassroomsPage from './pages/ClassroomsPage'
 import ResourcesPage from './pages/ResourcesPage'
 import PastPapersPage from './pages/PastPapersPage'
 import AdminPage from './pages/AdminPage'
+import SuperAdminRoute from './auth/SuperAdminRoute'
 
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Navigate to="/past-papers" replace />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <SuperAdminRoute>
+              <DashboardPage />
+            </SuperAdminRoute>
+          }
+        />
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/register-teacher" element={<TeacherRegisterPage />} />
 
-        <Route path="/classrooms" element={<ClassroomsPage />} />
-        <Route path="/resources" element={<ResourcesPage />} />
+        <Route
+          path="/classrooms"
+          element={
+            <SuperAdminRoute>
+              <ClassroomsPage />
+            </SuperAdminRoute>
+          }
+        />
+        <Route
+          path="/resources"
+          element={
+            <SuperAdminRoute>
+              <ResourcesPage />
+            </SuperAdminRoute>
+          }
+        />
         <Route path="/past-papers" element={<PastPapersPage />} />
 
-        <Route path="/admin" element={<AdminPage />} />
+        <Route
+          path="/admin"
+          element={
+            <SuperAdminRoute>
+              <AdminPage />
+            </SuperAdminRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/past-papers" replace />} />
       </Routes>

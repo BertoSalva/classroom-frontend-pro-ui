@@ -88,7 +88,7 @@ export default function TeacherRegisterPage() {
                   </div>
 
                   <div className="empty" style={{ marginBottom: 12 }}>
-                    If your code is delayed, please wait at least 5 minutes and then check your inbox/spam folder.
+                    If your code is delayed, please wait at least 5 minutes and then check your inbox.
                   </div>
 
                   {!verified && (

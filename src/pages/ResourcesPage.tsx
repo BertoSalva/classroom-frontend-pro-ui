@@ -22,6 +22,7 @@ export default function ResourcesPage() {
   const urlClassroomId = Number(params.get('classroomId') ?? 0)
   const { payload, roles } = useAuth()
   const teacherId = payload?.sub
+  const canUploadResources = roles.includes('SuperAdmin')
 
   const [classrooms, setClassrooms] = useState<ClassroomDto[]>([])
   const [classroomId, setClassroomId] = useState<number>(urlClassroomId)
@@ -84,7 +85,7 @@ export default function ResourcesPage() {
   }, [classroomId])
 
   const upload = async () => {
-    if (!classroomId || !file || !teacherId) return
+    if (!classroomId || !file || !teacherId || !canUploadResources) return
     setErr(null)
     setBusy(true)
     try {
@@ -121,10 +122,11 @@ export default function ResourcesPage() {
     [items, selectedCategory]
   )
 
-  const selectedClassroomName = useMemo(
-    () => classrooms.find((c) => c.id === classroomId)?.name || 'Unknown',
-    [classrooms, classroomId]
-  )
+  const selectedClassroomLabel = useMemo(() => {
+    const classroom = classrooms.find((c) => c.id === classroomId)
+    if (!classroom) return 'Unknown'
+    return `${classroom.gradeName} · ${classroom.subjectName}`
+  }, [classrooms, classroomId])
 
   return (
     <ProtectedRoute>
@@ -137,7 +139,7 @@ export default function ResourcesPage() {
                   <div>
                     <div style={{ fontWeight: 900 }}>Resources</div>
                     <div className="muted" style={{ marginTop: 6 }}>
-                      {classroomId ? `${selectedClassroomName} (ID: ${classroomId})` : '(select a classroom)'}
+                      {classroomId ? `${selectedClassroomLabel} (ID: ${classroomId})` : '(select a classroom)'}
                     </div>
                   </div>
                   <div className="spacer" />
@@ -154,7 +156,7 @@ export default function ResourcesPage() {
                       <select value={classroomId} onChange={(e) => setClassroomId(Number(e.target.value))}>
                         {classrooms.map((c) => (
                           <option key={c.id} value={c.id}>
-                            {c.name} (Grade {c.gradeId})
+                            Grade {c.gradeId} · {c.subjectName}
                           </option>
                         ))}
                       </select>
@@ -213,7 +215,7 @@ export default function ResourcesPage() {
             </div>
           </div>
 
-          {!roles.includes('Learner') && (
+          {canUploadResources && (
             <div className="col-4">
               <div className="card">
                 <div className="card-h">
