@@ -197,21 +197,15 @@ export default function ClassroomsPage() {
                               {group.classrooms.map((c) => (
                                 <div key={c.id} className="subject-entry">
                                   <div className="row" style={{ flexWrap: 'wrap', gap: 10 }}>
-                                    <div>
-                                      <div className="muted">Classroom ID: {c.id}</div>
-                                      {c.categories.length > 0 && (
-                                        <div className="muted" style={{ fontSize: '0.8rem', marginTop: 4 }}>
-                                          {c.categories.join(' • ')}
-                                        </div>
-                                      )}
-                                    </div>
+                                    {c.categories.length > 0 && (
+                                      <div className="muted" style={{ fontSize: '0.8rem', marginTop: 4 }}>
+                                        {c.categories.join(' • ')}
+                                      </div>
+                                    )}
                                     <div className="spacer" />
                                     <Link className="btn" to={`/resources?classroomId=${c.id}`}>
                                       View resources
                                     </Link>
-                                    <button className="btn" onClick={() => navigator.clipboard.writeText(String(c.id))}>
-                                      Copy ID
-                                    </button>
                                   </div>
                                 </div>
                               ))}

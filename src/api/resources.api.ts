@@ -61,4 +61,7 @@ export const resourcesApi = {
     })
     return res.data as Blob
   },
+
+  delete: async (resourceId: number) =>
+    (await http.delete(`/api/v1/resources/${resourceId}`)).data,
 }

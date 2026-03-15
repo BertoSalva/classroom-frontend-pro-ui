@@ -5,6 +5,7 @@ import logo from '../images/pbhsLogo.webp'
 export default function Sidebar() {
   const { roles } = useAuth()
   const isSuperAdmin = roles.includes('SuperAdmin')
+  const canManageUsers = roles.some((role) => ['SuperAdmin', 'Super Admin', 'Admin'].includes(role))
 
   return (
     <div className="sidebar">
@@ -19,6 +20,7 @@ export default function Sidebar() {
       <nav className="nav">
         {isSuperAdmin && <Link to="/dashboard">🏠 Dashboard</Link>}
         {isSuperAdmin && <Link to="/classrooms">🏫 Subject Management</Link>}
+        {canManageUsers && <Link to="/admin/users">👥 User management</Link>}
         <Link to="/past-papers">📚 Past Papers</Link>
       </nav>
 

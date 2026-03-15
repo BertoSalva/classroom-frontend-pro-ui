@@ -11,6 +11,7 @@ import ResourcesPage from './pages/ResourcesPage'
 import PastPapersPage from './pages/PastPapersPage'
 import AdminPage from './pages/AdminPage'
 import SuperAdminRoute from './auth/SuperAdminRoute'
+import UserManagementPage from './pages/UserManagementPage'
 
 export default function App() {
   return (
@@ -56,6 +57,7 @@ export default function App() {
             </SuperAdminRoute>
           }
         />
+        <Route path="/admin/users" element={<UserManagementPage />} />
 
         <Route path="*" element={<Navigate to="/past-papers" replace />} />
       </Routes>

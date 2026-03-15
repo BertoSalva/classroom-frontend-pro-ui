@@ -117,6 +117,24 @@ export default function ResourcesPage() {
     }
   }
 
+  const [deletingResourceId, setDeletingResourceId] = useState<number | null>(null)
+
+  const deleteResource = async (resourceId: number) => {
+    if (!canUploadResources) return
+    const confirmed = window.confirm('Delete this resource? This action cannot be undone.')
+    if (!confirmed) return
+    setErr(null)
+    setDeletingResourceId(resourceId)
+    try {
+      await resourcesApi.delete(resourceId)
+      await load()
+    } catch (e: any) {
+      setErr(e?.response?.data ?? 'Failed to delete resource')
+    } finally {
+      setDeletingResourceId(null)
+    }
+  }
+
   const filteredRows = useMemo(
     () => items.filter((r) => r.category === selectedCategory),
     [items, selectedCategory]
@@ -139,7 +157,7 @@ export default function ResourcesPage() {
                   <div>
                     <div style={{ fontWeight: 900 }}>Resources</div>
                     <div className="muted" style={{ marginTop: 6 }}>
-                      {classroomId ? `${selectedClassroomLabel} (ID: ${classroomId})` : '(select a classroom)'}
+                        {classroomId ? selectedClassroomLabel : '(select a classroom)'}
                     </div>
                   </div>
                   <div className="spacer" />
@@ -199,9 +217,21 @@ export default function ResourcesPage() {
                                 <td style={{ color: 'var(--text)' }}>{r.originalFileName}</td>
                                 <td>{new Date(r.uploadedAt).toLocaleString()}</td>
                                 <td style={{ textAlign: 'right' }}>
-                                  <button className="btn" onClick={() => download(r.id, r.originalFileName)}>
-                                    Download
-                                  </button>
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                                    <button className="btn" onClick={() => download(r.id, r.originalFileName)}>
+                                      Download
+                                    </button>
+                                    {canUploadResources && (
+                                      <button
+                                        className="btn"
+                                        style={{ backgroundColor: 'transparent', color: 'var(--text)', borderColor: 'rgba(0,0,0,0.08)' }}
+                                        disabled={deletingResourceId === r.id}
+                                        onClick={() => deleteResource(r.id)}
+                                      >
+                                        {deletingResourceId === r.id ? 'Deleting…' : 'Delete'}
+                                      </button>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             ))}
