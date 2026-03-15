@@ -119,10 +119,19 @@ export default function ResourcesPage() {
 
   const [deletingResourceId, setDeletingResourceId] = useState<number | null>(null)
 
-  const deleteResource = async (resourceId: number) => {
+  const [pendingDelete, setPendingDelete] = useState<ResourceDto | null>(null)
+
+  const requestDelete = (resource: ResourceDto) => {
     if (!canUploadResources) return
-    const confirmed = window.confirm('Delete this resource? This action cannot be undone.')
-    if (!confirmed) return
+    setPendingDelete(resource)
+  }
+
+  const cancelDelete = () => setPendingDelete(null)
+
+  const executeDelete = async () => {
+    if (!pendingDelete) return
+    const resourceId = pendingDelete.id
+    setPendingDelete(null)
     setErr(null)
     setDeletingResourceId(resourceId)
     try {
@@ -226,7 +235,7 @@ export default function ResourcesPage() {
                                         className="btn"
                                         style={{ backgroundColor: 'transparent', color: 'var(--text)', borderColor: 'rgba(0,0,0,0.08)' }}
                                         disabled={deletingResourceId === r.id}
-                                        onClick={() => deleteResource(r.id)}
+                                        onClick={() => requestDelete(r)}
                                       >
                                         {deletingResourceId === r.id ? 'Deleting…' : 'Delete'}
                                       </button>
@@ -327,6 +336,47 @@ export default function ResourcesPage() {
             </div>
           )}
         </div>
+        {pendingDelete && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(17,24,39,0.65)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 20,
+              zIndex: 50,
+            }}
+          >
+            <div
+              style={{
+                background: '#fff',
+                borderRadius: 18,
+                padding: 28,
+                width: 'min(420px, 100%)',
+                boxShadow: '0 18px 40px rgba(15,23,42,0.35)',
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: 12 }}>Delete resource</div>
+              <div className="muted" style={{ marginBottom: 18 }}>
+                Are you sure you want to delete <strong>{pendingDelete.originalFileName}</strong>? This cannot be undone.
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                <button className="btn" onClick={cancelDelete} disabled={deletingResourceId !== null}>
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={executeDelete}
+                  disabled={deletingResourceId !== null}
+                >
+                  {deletingResourceId === pendingDelete.id ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Layout>
     </ProtectedRoute>
   )

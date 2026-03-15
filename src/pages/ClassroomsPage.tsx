@@ -181,37 +181,32 @@ export default function ClassroomsPage() {
                           No classrooms found for Grade {activeGrade}. Create one on the right.
                         </div>
                       ) : (
-                        classroomsBySubject.map((group) => (
-                          <div key={group.subjectId} className="card subject-group-card">
-                            <div className="card-h" style={{ alignItems: 'center', gap: 10 }}>
-                              <div>
-                                <div style={{ fontWeight: 900 }}>{group.subjectName}</div>
-                                <div className="muted" style={{ marginTop: 4 }}>
-                                  {group.classrooms.length} classroom{group.classrooms.length === 1 ? '' : 's'}
-                                </div>
-                              </div>
-                              <div className="spacer" />
-                              <span className="pill">Grade {activeGrade}</span>
-                            </div>
-                            <div className="card-b" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                              {group.classrooms.map((c) => (
-                                <div key={c.id} className="subject-entry">
-                                  <div className="row" style={{ flexWrap: 'wrap', gap: 10 }}>
-                                    {c.categories.length > 0 && (
-                                      <div className="muted" style={{ fontSize: '0.8rem', marginTop: 4 }}>
-                                        {c.categories.join(' • ')}
-                                      </div>
-                                    )}
-                                    <div className="spacer" />
-                                    <Link className="btn" to={`/resources?classroomId=${c.id}`}>
-                                      View resources
-                                    </Link>
+                        classroomsBySubject.map((group) => {
+                          const primaryClassroom = group.classrooms[0]
+                          if (!primaryClassroom) return null
+                          return (
+                            <div key={group.subjectId} className="card subject-group-card">
+                              <div className="card-h" style={{ alignItems: 'center', gap: 10 }}>
+                                <div>
+                                  <div style={{ fontWeight: 900 }}>{group.subjectName}</div>
+                                  <div className="muted" style={{ marginTop: 4 }}>
+                                    {group.classrooms.length} classroom{group.classrooms.length === 1 ? '' : 's'}
                                   </div>
                                 </div>
-                              ))}
+                                <div className="spacer" />
+                                <span className="pill">Grade {activeGrade}</span>
+                              </div>
+                              <div className="card-b" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div className="muted" style={{ fontSize: '0.9rem' }}>
+                                  Select this subject to visit its resources page.
+                                </div>
+                                <Link className="btn btn-primary" to={`/resources?classroomId=${primaryClassroom.id}`}>
+                                  View resources
+                                </Link>
+                              </div>
                             </div>
-                          </div>
-                        ))
+                          )
+                        })
                       )}
                     </div>
                   </>
