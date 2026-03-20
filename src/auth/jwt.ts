@@ -43,3 +43,10 @@ export function getRoles(payload: JwtPayload | null): string[] {
   if (Array.isArray(r)) return r.map(String)
   return [String(r)]
 }
+
+export function isExpired(payload: JwtPayload | null) {
+  if (!payload?.exp) return false
+  const exp = Number(payload.exp)
+  if (!Number.isFinite(exp)) return false
+  return exp * 1000 <= Date.now()
+}

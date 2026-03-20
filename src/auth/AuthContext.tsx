@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useMemo, useState } from 'react'
-import { decodeJwt, getRoles, type JwtPayload } from './jwt'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { decodeJwt, getRoles, isExpired, type JwtPayload } from './jwt'
 
 type AuthState = {
   token: string | null
@@ -22,20 +22,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const payload = useMemo(() => (token ? decodeJwt(token) : null), [token])
   const roles = useMemo(() => getRoles(payload), [payload])
+  const hasExpiredToken = useMemo(() => Boolean(token && isExpired(payload)), [token, payload])
 
-  const setToken = (t: string | null) => {
-    setTokenState(t)
-    if (t) localStorage.setItem('access_token', t)
-    else localStorage.removeItem('access_token')
-  }
+  const setToken = useCallback(
+    (t: string | null) => {
+      setTokenState(t)
+      if (t) localStorage.setItem('access_token', t)
+      else localStorage.removeItem('access_token')
+    },
+    [setTokenState]
+  )
 
-  const logout = () => setToken(null)
+  const logout = useCallback(() => setToken(null), [setToken])
+
+  useEffect(() => {
+    if (!token || !payload?.exp) return
+    const expiresAt = Number(payload.exp) * 1000
+    if (!Number.isFinite(expiresAt)) return
+    const timeRemaining = expiresAt - Date.now()
+    if (timeRemaining <= 0) {
+      logout()
+      return
+    }
+    const timerId = window.setTimeout(logout, timeRemaining)
+    return () => window.clearTimeout(timerId)
+  }, [token, payload, logout])
 
   const value: AuthContextValue = {
     token,
     payload,
     roles,
-    isAuthed: !!token,
+    isAuthed: Boolean(token && !hasExpiredToken),
     setToken,
     logout,
   }
