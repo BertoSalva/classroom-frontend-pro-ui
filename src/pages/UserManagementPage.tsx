@@ -3,6 +3,7 @@ import Layout from '../components/Layout'
 import ProtectedRoute from '../auth/ProtectedRoute'
 import RoleGuard from '../auth/RoleGuard'
 import { usersApi, type UserWithRolesDto } from '../api/users.api'
+import Loader from '../components/Loader'
 
 const ROLE_CHOICES = [
   { value: 'SuperAdmin', label: 'Super Admin' },
@@ -131,7 +132,7 @@ export default function UserManagementPage() {
                   </div>
 
                   {busy ? (
-                    <div className="empty">Loading users…</div>
+                    <Loader label="Loading users..." />
                   ) : filteredUsers.length === 0 ? (
                     <div className="empty">No users match that query.</div>
                   ) : (

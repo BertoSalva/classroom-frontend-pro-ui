@@ -93,7 +93,14 @@ export default function RegisterPage() {
 
               <div className="row" style={{ marginTop: 12 }}>
                 <button className="btn btn-primary" onClick={register} disabled={busy}>
-                  {busy ? 'Creating…' : 'Register'}
+                  {busy ? (
+                    <span className="btn-loading">
+                      <span className="loader-spinner loader-spinner-sm" aria-hidden="true" />
+                      Creating...
+                    </span>
+                  ) : (
+                    'Register'
+                  )}
                 </button>
                 <div className="spacer" />
                 <Link className="muted" to="/register-teacher">

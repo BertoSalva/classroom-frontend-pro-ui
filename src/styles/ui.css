@@ -396,6 +396,57 @@ input:focus, select:focus{
   font-weight: 500;
 }
 
+.loader-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding: 16px;
+  color: var(--muted);
+}
+
+.loader-wrap-inline{
+  justify-content:flex-start;
+  padding: 0;
+}
+
+.loader-spinner{
+  border-radius:50%;
+  border: 2px solid rgba(0,0,0,0.12);
+  border-top-color: #dc2626;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+.loader-spinner-sm{
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.loader-spinner-md{
+  width: 20px;
+  height: 20px;
+  border-width: 3px;
+}
+
+.loader-label{
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.btn-loading{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+
+@keyframes spin{
+  to{
+    transform: rotate(360deg);
+  }
+}
+
 .row{
   display: flex;
   align-items: center;

@@ -5,6 +5,7 @@ import { resourcesApi, type ResourceDto } from '../api/resources.api'
 import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
 import { subjectsApi, type SubjectDto } from '../api/subjects.api'
 import { useSearchParams } from 'react-router-dom'
+import Loader from '../components/Loader'
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob)
@@ -326,7 +327,7 @@ export default function PastPapersPage() {
                   </>
                 )}
 
-                {busy && <div className="empty">Loading...</div>}
+                {busy && <Loader label="Loading past papers..." />}
 
                 {!busy && selectedGrade !== null && selectedSubjectId !== null && filteredPapers.length === 0 && (
                   <div className="empty">No past papers found for the selected filters.</div>

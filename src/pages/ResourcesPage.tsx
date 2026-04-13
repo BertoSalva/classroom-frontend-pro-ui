@@ -5,6 +5,7 @@ import ProtectedRoute from '../auth/ProtectedRoute'
 import { resourcesApi, type ResourceDto } from '../api/resources.api'
 import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
 import { useAuth } from '../auth/AuthContext'
+import Loader from '../components/Loader'
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob)
@@ -210,7 +211,9 @@ export default function ResourcesPage() {
                       <div className="empty">No resources in "{selectedCategory}". Upload a PDF on the right.</div>
                     )}
 
-                    {filteredRows.length > 0 && (
+                    {busy && <Loader label="Loading resources..." />}
+
+                    {filteredRows.length > 0 && !busy && (
                       <div className="table-wrapper">
                         <table className="table" style={{ marginTop: 10 }}>
                           <thead>
@@ -325,7 +328,14 @@ export default function ResourcesPage() {
                     onClick={upload}
                     disabled={!classroomId || !file || busy}
                   >
-                    {busy ? 'Uploading…' : 'Upload'}
+                    {busy ? (
+                      <span className="btn-loading">
+                        <span className="loader-spinner loader-spinner-sm" aria-hidden="true" />
+                        Uploading...
+                      </span>
+                    ) : (
+                      'Upload'
+                    )}
                   </button>
 
                   <div className="empty" style={{ marginTop: 12 }}>

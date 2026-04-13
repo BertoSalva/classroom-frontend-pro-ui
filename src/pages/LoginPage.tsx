@@ -62,7 +62,14 @@ export default function LoginPage() {
 
               <div className="row" style={{ marginTop: 12 }}>
                 <button className="btn btn-primary" onClick={login} disabled={busy}>
-                  {busy ? 'Signing in…' : 'Login'}
+                  {busy ? (
+                    <span className="btn-loading">
+                      <span className="loader-spinner loader-spinner-sm" aria-hidden="true" />
+                      Signing in...
+                    </span>
+                  ) : (
+                    'Login'
+                  )}
                 </button>
                 <div className="spacer" />
                 <Link className="muted" to="/register">

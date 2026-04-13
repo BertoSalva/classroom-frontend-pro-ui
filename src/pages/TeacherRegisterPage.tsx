@@ -118,7 +118,14 @@ export default function TeacherRegisterPage() {
                   <div className="row" style={{ marginTop: 12, gap: 10 }}>
                     {!verified && (
                       <button className="btn btn-primary" onClick={verifyCode} disabled={busy || !code.trim()}>
-                        {busy ? 'Verifying…' : 'Verify code'}
+                        {busy ? (
+                          <span className="btn-loading">
+                            <span className="loader-spinner loader-spinner-sm" aria-hidden="true" />
+                            Verifying...
+                          </span>
+                        ) : (
+                          'Verify code'
+                        )}
                       </button>
                     )}
                     <div className="spacer" />
@@ -162,7 +169,14 @@ export default function TeacherRegisterPage() {
 
                   <div className="row" style={{ marginTop: 12, gap: 10 }}>
                     <button className="btn btn-primary" onClick={register} disabled={busy}>
-                      {busy ? 'Creating…' : 'Register as Teacher'}
+                      {busy ? (
+                        <span className="btn-loading">
+                          <span className="loader-spinner loader-spinner-sm" aria-hidden="true" />
+                          Creating...
+                        </span>
+                      ) : (
+                        'Register as Teacher'
+                      )}
                     </button>
                     <div className="spacer" />
                     <Link className="muted" to="/register">

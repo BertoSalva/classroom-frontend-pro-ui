@@ -5,6 +5,7 @@ import { classroomsApi, type ClassroomDto } from '../api/classrooms.api'
 import { subjectsApi, type SubjectDto } from '../api/subjects.api'
 import { useAuth } from '../auth/AuthContext'
 import { Link, useSearchParams } from 'react-router-dom'
+import Loader from '../components/Loader'
 
 export default function ClassroomsPage() {
   const { payload, roles } = useAuth()
@@ -14,6 +15,7 @@ export default function ClassroomsPage() {
 
   const [items, setItems] = useState<ClassroomDto[]>([])
   const [busy, setBusy] = useState(true)
+  const [creating, setCreating] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
   const [gradeId, setGradeId] = useState<number>(8)
@@ -66,12 +68,15 @@ export default function ClassroomsPage() {
   const create = async () => {
     if (!teacherId || subjectId === null) return
     setErr(null)
+    setCreating(true)
     try {
       await classroomsApi.create({ gradeId, subjectId, teacherUserId: teacherId })
       await load()
       setSelectedGrade(gradeId)
     } catch (e: any) {
       setErr(e?.response?.data ?? 'Failed to create classroom')
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -158,6 +163,8 @@ export default function ClassroomsPage() {
                     {String(err)}
                   </div>
                 )}
+
+                {busy && <Loader label="Loading classrooms..." />}
 
                 {!busy && grades.length === 0 && <div className="empty">No classrooms yet. Create one on the right.</div>}
 
@@ -261,9 +268,16 @@ export default function ClassroomsPage() {
                   <button
                     className="btn btn-primary"
                     onClick={create}
-                    disabled={!teacherId || subjectId === null}
+                    disabled={!teacherId || subjectId === null || creating}
                   >
-                    Create
+                    {creating ? (
+                      <span className="btn-loading">
+                        <span className="loader-spinner loader-spinner-sm" aria-hidden="true" />
+                        Creating...
+                      </span>
+                    ) : (
+                      'Create'
+                    )}
                   </button>
                   {subjectErr ? (
                     <div className="empty" style={{ marginTop: 12, borderStyle: 'solid', borderColor: 'rgba(240,68,56,0.35)' }}>
