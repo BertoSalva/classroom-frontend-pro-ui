@@ -24,6 +24,8 @@ const GRADES = [
   { id: 12, name: 'Grade 12' },
 ]
 
+const PAPERS_PER_PAGE = 5
+
 export default function PastPapersPage() {
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') ?? ''
@@ -31,6 +33,7 @@ export default function PastPapersPage() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | 'all'>('all')
   const [selectedTerm, setSelectedTerm] = useState<number | 'all'>('all')
+  const [currentPage, setCurrentPage] = useState(1)
   const [allResources, setAllResources] = useState<ResourceDto[]>([])
   const [classrooms, setClassrooms] = useState<ClassroomDto[]>([])
   const [subjects, setSubjects] = useState<SubjectDto[]>([])
@@ -183,6 +186,15 @@ export default function PastPapersPage() {
     return filtered
   }, [searchQuery, selectedTerm, selectedYear, subjectPapers])
 
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredPapers.length / PAPERS_PER_PAGE))
+  }, [filteredPapers.length])
+
+  const paginatedPapers = useMemo(() => {
+    const start = (currentPage - 1) * PAPERS_PER_PAGE
+    return filteredPapers.slice(start, start + PAPERS_PER_PAGE)
+  }, [currentPage, filteredPapers])
+
   useEffect(() => {
     if (selectedYear !== 'all' && !availableYears.includes(selectedYear)) {
       setSelectedYear('all')
@@ -194,6 +206,16 @@ export default function PastPapersPage() {
       setSelectedTerm('all')
     }
   }, [availableTerms, selectedTerm])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedGrade, selectedSubjectId, selectedYear, selectedTerm, searchQuery])
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
 
   const onSelectGrade = (gradeId: number) => {
     setSelectedGrade(gradeId)
@@ -334,38 +356,57 @@ export default function PastPapersPage() {
                 )}
 
                 {!busy && selectedGrade !== null && selectedSubjectId !== null && filteredPapers.length > 0 && (
-                  <div className="table-wrapper">
-                    <table className="table" style={{ marginTop: 20 }}>
-                      <thead>
-                        <tr>
-                          <th>Title</th>
-                          <th>Classroom</th>
-                          <th>File</th>
-                          <th>Year</th>
-                          <th>Term</th>
-                          <th>Uploaded</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredPapers.map((r) => (
-                          <tr key={r.id}>
-                            <td style={{ color: 'var(--text)', fontWeight: 500 }}>{r.title}</td>
-                            <td>{r.classroomName}</td>
-                            <td>{r.originalFileName}</td>
-                            <td>{getPaperYear(r)}</td>
-                            <td>{typeof r.term === 'number' ? `Term ${r.term}` : '-'}</td>
-                            <td>{new Date(r.uploadedAt).toLocaleDateString()}</td>
-                            <td style={{ textAlign: 'right' }}>
-                              <button className="btn" onClick={() => download(r.id, r.originalFileName)}>
-                                Download
-                              </button>
-                            </td>
+                  <>
+                    <div className="table-wrapper">
+                      <table className="table" style={{ marginTop: 20 }}>
+                        <thead>
+                          <tr>
+                            <th>Title</th>
+                            <th>Classroom</th>
+                            <th>File</th>
+                            <th>Year</th>
+                            <th>Term</th>
+                            <th>Uploaded</th>
+                            <th></th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {paginatedPapers.map((r) => (
+                            <tr key={r.id}>
+                              <td style={{ color: 'var(--text)', fontWeight: 500 }}>{r.title}</td>
+                              <td>{r.classroomName}</td>
+                              <td>{r.originalFileName}</td>
+                              <td>{getPaperYear(r)}</td>
+                              <td>{typeof r.term === 'number' ? `Term ${r.term}` : '-'}</td>
+                              <td>{new Date(r.uploadedAt).toLocaleDateString()}</td>
+                              <td style={{ textAlign: 'right' }}>
+                                <button className="btn" onClick={() => download(r.id, r.originalFileName)}>
+                                  Download
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {filteredPapers.length > PAPERS_PER_PAGE && (
+                      <div className="row" style={{ marginTop: 14, justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="muted" style={{ fontSize: '0.9rem' }}>
+                          Showing {(currentPage - 1) * PAPERS_PER_PAGE + 1}-{Math.min(currentPage * PAPERS_PER_PAGE, filteredPapers.length)} of {filteredPapers.length}
+                        </div>
+                        <div className="row" style={{ gap: 8 }}>
+                          <button className="btn" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                            Previous
+                          </button>
+                          <span className="pill">Page {currentPage} of {totalPages}</span>
+                          <button className="btn" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
