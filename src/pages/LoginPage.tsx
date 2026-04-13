@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { authApi } from '../api/auth.api'
 import { useAuth } from '../auth/AuthContext'
+import Loader from '../components/Loader'
 
 export default function LoginPage() {
   const nav = useNavigate()
@@ -45,13 +46,36 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="card-b">
+              {busy && (
+                <div className="signin-loader-panel">
+                  <Loader label="Signing you in..." inline />
+                  <div className="signin-loader-subtext">
+                    Verifying your credentials and preparing your workspace.
+                  </div>
+                  <div className="signin-loader-track" aria-hidden="true">
+                    <span className="signin-loader-fill" />
+                  </div>
+                </div>
+              )}
+
               <div className="field">
                 <label>Email</label>
-                <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" />
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@email.com"
+                  disabled={busy}
+                />
               </div>
               <div className="field">
                 <label>Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={busy}
+                />
               </div>
 
               {err && (
