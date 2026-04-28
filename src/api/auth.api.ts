@@ -27,6 +27,16 @@ export type ConfirmEmailCodeRequest = {
   code: string
 }
 
+export type ForgotPasswordRequest = {
+  email: string
+}
+
+export type ResetPasswordRequest = {
+  email: string
+  token: string
+  newPassword: string
+}
+
 export const authApi = {
   register: async (req: RegisterRequest) => {
     const { data } = await http.post<RegisterResponse>('/api/v1/auth/register', req)
@@ -39,5 +49,11 @@ export const authApi = {
   login: async (req: LoginRequest) => {
     const { data } = await http.post<AuthResponse>('/api/v1/auth/login', req)
     return data
+  },
+  forgotPassword: async (req: ForgotPasswordRequest) => {
+    await http.post('/api/v1/auth/forgot-password', req)
+  },
+  resetPassword: async (req: ResetPasswordRequest) => {
+    await http.post('/api/v1/auth/reset-password', req)
   },
 }

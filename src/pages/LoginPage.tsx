@@ -78,6 +78,12 @@ export default function LoginPage() {
                 />
               </div>
 
+              <div className="row" style={{ justifyContent: 'flex-end', marginTop: -4 }}>
+                <Link className="muted" to="/forgot-password">
+                  Forgot password?
+                </Link>
+              </div>
+
               {err && (
                 <div className="empty" style={{ borderStyle: 'solid', borderColor: 'rgba(240,68,56,0.35)' }}>
                   {String(err)}
