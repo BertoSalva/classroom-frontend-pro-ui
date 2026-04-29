@@ -33,8 +33,7 @@ export default function ResetPasswordPage() {
       return
     }
 
-    // Some email clients may alter '+' during link handling; normalize before sending.
-    const normalizedToken = token.trim().replace(/ /g, '+')
+   const normalizedToken = token.trim()
 
     setBusy(true)
     try {
