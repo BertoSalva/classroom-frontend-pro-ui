@@ -8,7 +8,18 @@ export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
 
   const initialEmail = useMemo(() => searchParams.get('email') ?? '', [searchParams])
-  const initialToken = useMemo(() => searchParams.get('token') ?? '', [searchParams])
+  const initialToken = useMemo(() => {
+    const rawQuery = window.location.search.replace(/^\?/, '')
+    const tokenPart = rawQuery
+      .split('&')
+      .find((part) => part.startsWith('token='))
+
+    if (tokenPart) {
+      return tokenPart.slice('token='.length)
+    }
+
+    return searchParams.get('token') ?? ''
+  }, [searchParams])
   const hasQueryCredentials = useMemo(() => Boolean(initialEmail && initialToken), [initialEmail, initialToken])
 
   const [email, setEmail] = useState(initialEmail)
@@ -33,13 +44,13 @@ export default function ResetPasswordPage() {
       return
     }
 
-   const normalizedToken = token.trim()
+    const rawToken = token.trim()
 
     setBusy(true)
     try {
       await authApi.resetPassword({
         email: email.trim(),
-        token: normalizedToken,
+        token: rawToken,
         newPassword,
       })
       setSuccess('Your password has been reset. You can now sign in with your new password.')
